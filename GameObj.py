@@ -9,8 +9,7 @@ class GameObj:
         self.row = int(row)
         self.col = int(col)
         self.owner = owner
-        if self.owner:
-            self.owner.soldiers.append(self)
+
 
         if board and not board[self.row][self.col]:
             board[self.row][self.col] = self
@@ -47,7 +46,7 @@ class GameObj:
 
     def dead(self, board):
         #board[self.row][self.col] = None
-        self.owner.soldiers.remove(self)
+        pass
 
     def move(self, board, loc):
         target = board[loc[0]][loc[1]]

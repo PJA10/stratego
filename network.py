@@ -1,7 +1,6 @@
 import socket
 import pickle
 
-
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,30 +18,45 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            g = self.client.recv(32768*4)
+            g = recv(self.client)
             #print(g)
             #print(pickle.loads(g))
             self.client.send(b'1')
-            b = self.client.recv(32768*8)
+            b = recv(self.client)
             #print(b)
             #print(pickle.loads(b))
-            return pickle.loads(g), pickle.loads(b)
+            return g, b
         except Exception as e:
             print(e)
 
     def send(self, data):
         try:
-            msg = pickle.dumps(data)
             #print(msg)
             #print(pickle.loads(msg))
-            self.client.send(pickle.dumps(data))
-            got = self.client.recv(32768*16)
+            send_msg(self.client, data)
+            got = recv(self.client)
             #print('got:', got)
             #print(pickle.loads(got))
-            ret = pickle.loads(got)
-            return ret
+            return got
         except socket.error as e:
             print(e)
 
     def close(self):
         self.client.close()
+
+
+def get_len(msg):
+    return str(len(msg)).ljust(20)
+
+def send_msg(conn , msg):
+    msg_b = pickle.dumps(msg)
+    len_msg = get_len(msg_b).encode('utf-8')
+    conn.sendall(len_msg + msg_b)
+
+def recv(conn):
+    msg_len = int(conn.recv(20))
+    recved = b""
+    while len(recved) < msg_len:
+        recved = recved + conn.recv(msg_len-len(recved))
+    ret = pickle.loads(recved)
+    return ret

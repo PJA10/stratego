@@ -37,7 +37,8 @@ def main():
 
     game_states = "starting"
     curr_soldier_class = 0
-    if not my_player.soldiers:
+    if not my_player.finished_setup:
+        created_soldiers = []
         while soldiers_list[-1][1] and game_states != "exit":
             clicked_locations = []
 
@@ -54,11 +55,12 @@ def main():
                 loc = clicked_locations[0]
                 if (my_player.id == 1 and loc[0] < 4) or (my_player.id == 0 and loc[0] > 5):
 
-                    for soldier in my_player.soldiers:
+                    for soldier in created_soldiers:
                         if (soldier.row, soldier.col) == loc:
                             break
                     else:
-                        soldiers_list[curr_soldier_class][0](board, loc[0], loc[1], my_player)
+                        new_soldier = soldiers_list[curr_soldier_class][0](board, loc[0], loc[1], my_player)
+                        created_soldiers.append(new_soldier)
 
                         soldiers_list[curr_soldier_class][1] -= 1
                         if not soldiers_list[curr_soldier_class][1]:
@@ -68,8 +70,9 @@ def main():
             pygame.display.flip()
             clock.tick(FPS)
         if game_states != "exit":
-            for soldier in my_player.soldiers:
+            for soldier in created_soldiers:
                 n.send((soldier, (soldier.row, soldier.col)))
+            my_player.finished_setup = True
 
     selected_soldier = None
     possible_move_locs = []

@@ -23,11 +23,6 @@ class Game:
 
 
     def play(self, data):
-        for row in self.board:
-            if data[0] in row:
-                break
-        else:
-            self.players[data[0].owner.id].soldiers.append(data[0])
         loc = (int(data[1][0]),int(data[1][1]))
         result = data[0].move(self.board, loc)
         if isinstance(result, tuple) and result[0] == "win":

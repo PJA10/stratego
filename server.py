@@ -1,9 +1,11 @@
 import socket
 from _thread import *
-import sys
+import sys, os
 from Player import *
 import pickle
 from Game import *
+from network import send_msg, recv, get_len
+
 
 server = "192.168.1.22"
 port = 1234
@@ -20,21 +22,22 @@ print("Waiting for a connection, Server Started")
 game = Game()
 
 
+
 def threaded_client(conn, player):
     global game
-    send = pickle.dumps(game.players[player])
-    print(send)
-    print(pickle.loads(send))
-    conn.sendall(send)
-    send = pickle.dumps(game)
-    print(send)
-    print(pickle.loads(send))
-    print(conn.recv(1))
-    conn.sendall(send)
+    # send clinet player
+    msg = game.players[player]
+    send_msg(conn, msg)
+    # devider
+    conn.recv(1)
+    # send overall game
+    msg = game
+    send_msg(conn, msg)
+
     reply = ""
     while True:
         try:
-            data = pickle.loads(conn.recv(32768*2))
+            data = recv(conn)
 
             if not data:
                 print("Disconnected")
@@ -88,12 +91,13 @@ def threaded_client(conn, player):
 
                 #print("Received: ", data)
                 #print("Sending : ", reply)
-            reply = pickle.dumps(reply)
             #print(reply)
             #print(pickle.loads(reply))
-            conn.sendall(reply)
+            send_msg(conn, reply)
         except Exception as e:
-            print("e:", e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno, str(e))
             break
 
     print("Lost connection")

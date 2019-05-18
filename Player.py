@@ -5,7 +5,7 @@ class Player:
 
     def __init__(self, id):
         self.id = id
-        self.soldiers = []
+        self.finished_setup = False
         if id == 0:
             self.color = blue
             self.my_turn = True
